@@ -44,17 +44,21 @@
     border-radius: 10px; margin-bottom: 8px;
   }
   .fuel-name { font-weight: 600; font-size: 16px; }
-  .fuel-status { font-size: 14px; }
+  .fuel-status { font-size: 14px; text-align: right; }
   .time { font-size: 12px; color: var(--tg-theme-hint-color, #999); }
   .buttons-row {
-    display: flex; gap: 8px; margin-top: 6px; margin-bottom: 14px;
+    display: flex; gap: 6px; margin-top: 6px; margin-bottom: 14px;
+    flex-wrap: wrap;
   }
   .btn-status {
-    flex: 1; padding: 12px; border-radius: 10px; border: none;
-    font-size: 14px; cursor: pointer; font-weight: 600;
+    flex: 1 1 45%; padding: 12px 8px; border-radius: 10px; border: none;
+    font-size: 13px; cursor: pointer; font-weight: 600;
+    min-width: 0;
   }
   .btn-yes { background: #4caf50; color: white; }
-  .btn-low { background: #ffc107; color: black; }
+  .btn-limit { background: #ffc107; color: black; }
+  .btn-card { background: #9c27b0; color: white; }
+  .btn-app { background: #2196f3; color: white; }
   .btn-no { background: #f44336; color: white; }
   .btn-status:active { opacity: 0.7; }
   .section-title { font-size: 15px; font-weight: 600; margin: 18px 0 8px; }
@@ -62,6 +66,7 @@
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
     background: #333; color: white; padding: 12px 20px; border-radius: 8px;
     font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    z-index: 100;
   }
   .toast.show { opacity: 1; }
 </style>
@@ -87,7 +92,6 @@ tg.expand();
 
 let currentView = { type: "cities" };
 let currentCity = null;
-let currentStation = null;
 
 const content = document.getElementById("content");
 const headerTitle = document.getElementById("headerTitle");
@@ -167,8 +171,14 @@ async function showStations(city) {
   }
 }
 
-const FUEL_LIST = ["АИ-92", "АИ-95", "АИ-98", "ДТ"];
-const STATUS_ICONS = { yes: "🟢 Есть", low: "🟡 Мало", no: "🔴 Нет" };
+const FUEL_LIST = ["АИ-92", "АИ-95", "АИ-98", "ДТ", "Пропан", "Метан"];
+const STATUS_ICONS = {
+  yes: "🟢 Есть",
+  limit: "🟡 Лимит",
+  card: "🟣 По картам",
+  app: "🔵 Через приложение",
+  no: "🔴 Нет"
+};
 
 async function showStation(sid) {
   currentView = { type: "station" };
@@ -180,7 +190,6 @@ async function showStation(sid) {
       content.innerHTML = '<div class="loading">АЗС не найдена</div>';
       return;
     }
-    currentStation = st;
     headerTitle.textContent = "⛽ " + st.name;
     backBtn.classList.add("visible");
 
@@ -197,7 +206,7 @@ async function showStation(sid) {
       }
       html += `<div class="fuel-row">
         <span class="fuel-name">${fuel}</span>
-        <span class="fuel-status">${statusText} <span class="time">${timeText}</span></span>
+        <span class="fuel-status">${statusText}<br><span class="time">${timeText}</span></span>
       </div>`;
     }
 
@@ -206,7 +215,9 @@ async function showStation(sid) {
       html += `<div style="margin-bottom:6px; font-size:14px; color:var(--tg-theme-hint-color)">${fuel}</div>`;
       html += `<div class="buttons-row">
         <button class="btn-status btn-yes" data-fuel="${fuel}" data-status="yes">🟢 Есть</button>
-        <button class="btn-status btn-low" data-fuel="${fuel}" data-status="low">🟡 Мало</button>
+        <button class="btn-status btn-limit" data-fuel="${fuel}" data-status="limit">🟡 Лимит</button>
+        <button class="btn-status btn-card" data-fuel="${fuel}" data-status="card">🟣 По картам</button>
+        <button class="btn-status btn-app" data-fuel="${fuel}" data-status="app">🔵 Приложение</button>
         <button class="btn-status btn-no" data-fuel="${fuel}" data-status="no">🔴 Нет</button>
       </div>`;
     }
